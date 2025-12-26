@@ -7,11 +7,11 @@ import '../models/weather_model.dart';
 class WeatherService {
   // ⚠️ استبدل النص أدناه بمفتاح الـ API الخاص بك من موقع OpenWeather
   static const String apiKey = 'd0b5d0b5df6911813e6e6e7341bb3065';
-  static const String baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
+  static const String baseUrl = 'https://api.openweathermap.org/data/2.5';
 
-  Future<WeatherModel> getWeather(String cityName) async {
+  Future<WeatherModel> getWeather(String cityName, {String lang = 'ar'}) async {
     final response = await http.get(
-      Uri.parse('$baseUrl?q=$cityName&appid=$apiKey&units=metric&lang=ar'),
+      Uri.parse('$baseUrl/weather?q=$cityName&appid=$apiKey&units=metric&lang=$lang'),
     );
 
     if (response.statusCode == 200) {
@@ -45,9 +45,9 @@ class WeatherService {
   }
 
   // دالة لجلب توقعات 5 أيام
-  Future<List<WeatherModel>> getForecast(String cityName) async {
+  Future<List<WeatherModel>> getForecast(String cityName, {String lang = 'ar'}) async {
     final response = await http.get(
-      Uri.parse('https://api.openweathermap.org/data/2.5/forecast?q=$cityName&appid=$apiKey&units=metric&lang=ar'),
+      Uri.parse('$baseUrl/forecast?q=$cityName&appid=$apiKey&units=metric&lang=$lang'),
     );
 
     if (response.statusCode == 200) {

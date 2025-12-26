@@ -1,11 +1,14 @@
 class WeatherModel {
   final String cityName;
   final double temperature;
-  final String mainCondition; // مثال: Clouds, Rain, Clear
-  final String description;   // مثال: light rain
-  final String iconCode;      // رمز الأيقونة من API
+  final String mainCondition;
+  final String description;
+  final String iconCode;
   final int humidity;
   final double windSpeed;
+  // --- جديد: الشروق والغروب ---
+  final int sunrise;
+  final int sunset;
 
   WeatherModel({
     required this.cityName,
@@ -15,9 +18,10 @@ class WeatherModel {
     required this.iconCode,
     required this.humidity,
     required this.windSpeed,
+    required this.sunrise,
+    required this.sunset,
   });
 
-  // دالة لتحويل بيانات JSON القادمة من الموقع إلى بيانات يفهمها التطبيق
   factory WeatherModel.fromJson(Map<String, dynamic> json) {
     return WeatherModel(
       cityName: json['name'] ?? '',
@@ -27,6 +31,9 @@ class WeatherModel {
       iconCode: json['weather'][0]['icon'],
       humidity: json['main']['humidity'],
       windSpeed: json['wind']['speed'].toDouble(),
+      // جلب بيانات الوقت (قد تكون داخل sys)
+      sunrise: json['sys']['sunrise'] ?? 0,
+      sunset: json['sys']['sunset'] ?? 0,
     );
   }
 }

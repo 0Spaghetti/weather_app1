@@ -4,6 +4,10 @@ import '../services/weather_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings_provider.dart';
+import 'settings_page.dart';
+import 'dart:ui'; // مهمة جداً للتأثير الزجاجي (BackdropFilter)
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -42,10 +46,11 @@ class _WeatherPageState extends State<WeatherPage> {
   // تعديل دالة جلب الطقس لتقبل اسم مدينة محدد
   Future<void> _fetchWeather(String cityName) async {
     setState(() => _isLoading = true);
+    final lang = Provider.of<SettingsProvider>(context, listen: false).language;
 
     try {
-      final weather = await _weatherService.getWeather(cityName);
-      final forecast = await _weatherService.getForecast(cityName);
+      final weather = await _weatherService.getWeather(cityName, lang: lang);
+      final forecast = await _weatherService.getForecast(cityName, lang: lang);
 
       setState(() {
         _weather = weather;
@@ -156,6 +161,9 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final settings = Provider.of<SettingsProvider>(context);
+    
     return Scaffold(
       // شريط العنوان وأزرار البحث (كما هي)
       appBar: AppBar(
@@ -171,6 +179,14 @@ class _WeatherPageState extends State<WeatherPage> {
           },
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              // ننتقل للإعدادات، وعند العودة نحدث البيانات (لتطبيق تغيير اللغة)
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()))
+                  .then((_) => _loadLastCityAndFetch());
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white, size: 28),
             onPressed: _showCitySearchDialog,
@@ -236,10 +252,12 @@ class _WeatherPageState extends State<WeatherPage> {
 
                     const SizedBox(height: 30),
 
-                    Text('${_weather?.temperature.round()}°C',
-                        style: const TextStyle(color: Colors.white,
-                            fontSize: 80,
-                            fontWeight: FontWeight.bold)),
+                    Text(
+                      settings.isCelsius
+                         ? '${_weather?.temperature.round()}°C'
+                         : '${(_weather!.temperature * 9/5 + 32).round()}°F', // معادلة التحويل
+                      style: const TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.bold),
+                    ),
                     Text(_weather?.mainCondition ?? "", style: const TextStyle(
                         color: Colors.white70, fontSize: 24)),
 
@@ -272,6 +290,25 @@ class _WeatherPageState extends State<WeatherPage> {
                       ],
                     ),
 
+                    if (settings.showSunDetails && _weather != null) ...[
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(children: [
+                               const Icon(Icons.wb_sunny, color: Colors.yellow),
+                               Text(DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(_weather!.sunrise * 1000)), style: const TextStyle(color: Colors.white)),
+                               const Text("الشروق", style: TextStyle(color: Colors.white70, fontSize: 10)),
+                            ]),
+                            Column(children: [
+                               const Icon(Icons.nights_stay, color: Colors.orange),
+                               Text(DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(_weather!.sunset * 1000)), style: const TextStyle(color: Colors.white)),
+                               const Text("الغروب", style: TextStyle(color: Colors.white70, fontSize: 10)),
+                            ]),
+                          ],
+                        )
+                    ],
+
                     const SizedBox(height: 30),
                     const Text("توقعات الأيام القادمة", style: TextStyle(
                         color: Colors.white,
@@ -279,7 +316,7 @@ class _WeatherPageState extends State<WeatherPage> {
                         fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
 
-// القائمة السفلية
+                    // القائمة السفلية
                     SizedBox(
                       height: 150,
                       child: ListView.builder(
@@ -287,30 +324,28 @@ class _WeatherPageState extends State<WeatherPage> {
                         itemCount: _forecast?.length ?? 0,
                         itemBuilder: (context, index) {
                           final dayWeather = _forecast![index];
-                          return Container(
+
+                          Widget cardContent = Container(
+                            width: 100,
                             margin: const EdgeInsets.symmetric(horizontal: 8),
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(15)),
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                            ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // --- التعديل هنا ---
-                                // بدلاً من Image.network نستخدم Lottie.asset
                                 Lottie.asset(
                                   _getWeatherAnimation(dayWeather.mainCondition),
-                                  height: 50, // جعلنا الحجم صغيراً ليناسب القائمة
+                                  height: 50,
                                 ),
-                                // ------------------
-
-                                const SizedBox(height: 5), // مسافة صغيرة
-
+                                const SizedBox(height: 5),
                                 Text('${dayWeather.temperature.round()}°C',
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold)),
-
                                 Text(
                                   DateFormat('E', 'ar').format(DateTime.now().add(Duration(days: index + 1))),
                                   style: const TextStyle(color: Colors.white70),
@@ -318,6 +353,18 @@ class _WeatherPageState extends State<WeatherPage> {
                               ],
                             ),
                           );
+
+                          if (settings.enableGlassmorphism) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: cardContent,
+                              ),
+                            );
+                          } else {
+                            return cardContent;
+                          }
                         },
                       ),
                     ),

@@ -22,15 +22,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final settings = Provider.of<SettingsProvider>(context);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false, // إخفاء شريط التصحيح المزعج
       title: 'تطبيق الطقس',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: ThemeData.light(useMaterial3: true), // থিম হালকা
+      darkTheme: ThemeData.dark(useMaterial3: true), // থিম ডার্ক
+      themeMode: settings.isDarkMode ? ThemeMode.dark : ThemeMode.light, // وضع الثيم
       // home: const WeatherPage(), // تحديد صفحة الطقس كصفحة البداية
       home: const SplashScreen(), // <-- ضع هذا السطر الجديد
     );
