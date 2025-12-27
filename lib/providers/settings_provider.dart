@@ -8,6 +8,7 @@ class SettingsProvider with ChangeNotifier {
   bool _isCelsius = true;
   bool _enableGlassmorphism = true;
   bool _showSunDetails = true;
+  bool _useCardLayout = false;
   String _language = 'ar'; // 'ar' or 'en'
 
   // استدعاء القيم لقراءتها
@@ -15,6 +16,7 @@ class SettingsProvider with ChangeNotifier {
   bool get isCelsius => _isCelsius;
   bool get enableGlassmorphism => _enableGlassmorphism;
   bool get showSunDetails => _showSunDetails;
+  bool get useCardLayout => _useCardLayout;
   String get language => _language;
 
   // تحميل الإعدادات المحفوظة عند فتح التطبيق
@@ -25,6 +27,7 @@ class SettingsProvider with ChangeNotifier {
     _enableGlassmorphism = prefs.getBool('enableGlass') ?? true;
     _showSunDetails = prefs.getBool('showSun') ?? true;
     _language = prefs.getString('language') ?? 'ar';
+    _useCardLayout = prefs.getBool('useCardLayout') ?? false;
     notifyListeners();
   }
 
@@ -61,6 +64,13 @@ class SettingsProvider with ChangeNotifier {
     _language = lang;
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('language', lang);
+    notifyListeners();
+  }
+
+  void toggleCardLayout(bool value) async {
+    _useCardLayout = value;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('useCardLayout', value);
     notifyListeners();
   }
 }

@@ -240,7 +240,7 @@ class _WeatherPageState extends State<WeatherPage> {
   Widget build(BuildContext context) {
 
     final settings = Provider.of<SettingsProvider>(context);
-    
+
     return Scaffold(
       // شريط العنوان وأزرار البحث (كما هي)
       appBar: AppBar(
@@ -291,250 +291,297 @@ class _WeatherPageState extends State<WeatherPage> {
               padding: const EdgeInsets.only(top: 100, bottom: 20), // مسافة من الأعلى (عشان الـ AppBar) ومن الأسفل
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // المحتوى السابق
-                    const Icon(
-                        Icons.location_on, color: Colors.white, size: 30),
-                    const SizedBox(height: 10),
+                children: [
+                  // المحتوى السابق
+                  const Icon(
+                      Icons.location_on, color: Colors.white, size: 30),
+                  const SizedBox(height: 10),
 
-                    Text(
-                      _weather?.cityName.toUpperCase() ?? "",
-                      style: const TextStyle(color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold),
-                    ),
+                  Text(
+                    _weather?.cityName.toUpperCase() ?? "",
+                    style: const TextStyle(color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold),
+                  ),
 
-                    // --- 2. ميزة التاريخ والوقت ---
-                    const SizedBox(height: 5),
-                    Text(
-                      DateFormat('EEEE, d MMMM yyyy | hh:mm a', settings.language).format(DateTime.now()), // استخدام settings.language                          DateTime.now()),
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 16),
-                    ),
-                    // -----------------------------
+                  // --- 2. ميزة التاريخ والوقت ---
+                  const SizedBox(height: 5),
+                  Text(
+                    DateFormat('EEEE, d MMMM yyyy | hh:mm a', settings.language).format(DateTime.now()), // استخدام settings.language                          DateTime.now()),
+                    style: const TextStyle(
+                        color: Colors.white70, fontSize: 16),
+                  ),
+                  // -----------------------------
 
-                    const SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
-                    // عرض أنيميشن Lottie
-                    Lottie.asset(
-                      _getWeatherAnimation(_weather?.mainCondition),
-                      height: 200, // يمكنك التحكم بالحجم
-                    ),
+                  const SizedBox(height: 20),
 
-                    const SizedBox(height: 30),
+                  // --- بطاقة الطقس الحالية الموحدة (أنيميشن + حرارة + وصف) ---
+                  Builder(
+                    builder: (context) {
+                      Widget mainCard = Container(
+                        width: double.infinity, // البطاقة تأخذ العرض المتاح
+                        margin: const EdgeInsets.symmetric(horizontal: 20), // هوامش جانبية لكي لا تلتصق بالحواف
+                        padding: const EdgeInsets.symmetric(vertical: 20), // مساحة داخلية
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15), // لون خلفية شفاف
+                          borderRadius: BorderRadius.circular(30), // زوايا دائرية ناعمة
+                          border: Border.all(color: Colors.white.withOpacity(0.2)), // حدود بيضاء خفيفة
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min, // الصندوق يأخذ حجم محتوياته فقط
+                          children: [
+                            // 1. الأنيميشن (أصبح الآن داخل الصندوق)
+                            Lottie.asset(
+                              _getWeatherAnimation(_weather?.mainCondition),
+                              height: 160, // تصغير الحجم قليلاً ليناسب البطاقة
+                            ),
 
-                    Text(
-                      settings.isCelsius
-                         ? '${_weather?.temperature.round()}°C'
-                         : '${(_weather!.temperature * 9/5 + 32).round()}°F', // معادلة التحويل
-                      style: const TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.bold),
-                    ),
-                    Text(_weather?.mainCondition ?? "", style: const TextStyle(
-                        color: Colors.white70, fontSize: 24)),
+                            const SizedBox(height: 10),
 
-                    const SizedBox(height: 30),
+                            // 2. درجة الحرارة
+                            Text(
+                              settings.isCelsius
+                                  ? '${_weather?.temperature.round()}°C'
+                                  : '${(_weather!.temperature * 9 / 5 + 32).round()}°F',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 70, // خط كبير وواضح
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
 
-                    // قسم الرطوبة والرياح (الذي أضفناه سابقاً)
+                            // 3. حالة الطقس (مثل Clear, Rain)
+                            Text(
+                              _weather?.mainCondition ?? "",
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      // تطبيق تأثير الزجاج إذا كان مفعلاً
+                      if (settings.enableGlassmorphism) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: mainCard,
+                          ),
+                        );
+                      } else {
+                        return mainCard;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 30),
+
+                  // قسم الرطوبة والرياح (الذي أضفناه سابقاً)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          const Icon(Icons.water_drop, color: Colors.white),
+                          const Text("الرطوبة",
+                              style: TextStyle(color: Colors.white70)),
+                          Text("${_weather?.humidity}%",
+                              style: const TextStyle(color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          const Icon(Icons.air, color: Colors.white),
+                          const Text("الرياح",
+                              style: TextStyle(color: Colors.white70)),
+                          Text("${_weather?.windSpeed} km/h",
+                              style: const TextStyle(color: Colors.white,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  if (settings.showSunDetails && _weather != null) ...[
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Column(
-                          children: [
-                            const Icon(Icons.water_drop, color: Colors.white),
-                            const Text("الرطوبة",
-                                style: TextStyle(color: Colors.white70)),
-                            Text("${_weather?.humidity}%",
-                                style: const TextStyle(color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            const Icon(Icons.air, color: Colors.white),
-                            const Text("الرياح",
-                                style: TextStyle(color: Colors.white70)),
-                            Text("${_weather?.windSpeed} km/h",
-                                style: const TextStyle(color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
-                          ],
-                        ),
+                        Column(children: [
+                          const Icon(Icons.wb_sunny, color: Colors.yellow),
+                          Text(DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(_weather!.sunrise * 1000)), style: const TextStyle(color: Colors.white)),
+                          const Text("الشروق", style: TextStyle(color: Colors.white70, fontSize: 10)),
+                        ]),
+                        Column(children: [
+                          const Icon(Icons.nights_stay, color: Colors.orange),
+                          Text(DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(_weather!.sunset * 1000)), style: const TextStyle(color: Colors.white)),
+                          const Text("الغروب", style: TextStyle(color: Colors.white70, fontSize: 10)),
+                        ]),
                       ],
-                    ),
-
-                    if (settings.showSunDetails && _weather != null) ...[
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Column(children: [
-                               const Icon(Icons.wb_sunny, color: Colors.yellow),
-                               Text(DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(_weather!.sunrise * 1000)), style: const TextStyle(color: Colors.white)),
-                               const Text("الشروق", style: TextStyle(color: Colors.white70, fontSize: 10)),
-                            ]),
-                            Column(children: [
-                               const Icon(Icons.nights_stay, color: Colors.orange),
-                               Text(DateFormat('hh:mm a').format(DateTime.fromMillisecondsSinceEpoch(_weather!.sunset * 1000)), style: const TextStyle(color: Colors.white)),
-                               const Text("الغروب", style: TextStyle(color: Colors.white70, fontSize: 10)),
-                            ]),
-                          ],
-                        )
-                    ],
-
-                    const SizedBox(height: 30),
-                    // --- قسم توقعات الساعات (الجديد) ---
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text("خلال 24 ساعة", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    SizedBox(
-                      height: 100, // ارتفاع أقل قليلاً من القائمة السفلية
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _hourlyForecast?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          final hourWeather = _hourlyForecast![index];
-                          // استخراج الوقت فقط (الساعة)
-                          // الـ API يعيد الوقت بصيغة "2023-10-25 15:00:00"
-                          // نحن نريد عرض الساعة فقط "03:00 PM"
-                          // سنستخدم DateFormat مخصص لذلك، لكن للسهولة سنستخدم DateTime parsing
-                          // (ملاحظة: هذا يتطلب أن يكون weather_model يحتوي على خاصية dt_txt أو نحسبها يدوياً)
-                          // *تحديث سريع*: WeatherModel الحالي لا يحفظ الوقت كنص.
-                          // *الحل*: سنضيف الوقت الحالي + (index * 3) ساعات لتقريب الوقت، أو نعدل المودل.
-                          // الأسهل والأنظف الآن هو استخدام وقت تقريبي للعرض:
-                          final time = DateTime.now().add(Duration(hours: (index + 1) * 3));
-
-                          Widget cardContent = Container(
-                            width: 80,
-                            margin: const EdgeInsets.symmetric(horizontal: 5),
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white.withOpacity(0.1)),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  DateFormat('hh:mm a', settings.language).format(time), // الساعة
-                                  style: const TextStyle(color: Colors.white70, fontSize: 10),
-                                ),
-                                Lottie.asset(
-                                  _getWeatherAnimation(hourWeather.mainCondition),
-                                  height: 30,
-                                ),
-                                Text(
-                                  '${hourWeather.temperature.round()}°',
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          // تطبيق الزجاج إذا مفعل
-                          return settings.enableGlassmorphism
-                              ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                child: cardContent),
-                          )
-                              : cardContent;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // ------------------------------------
-                    const Text("توقعات الأيام القادمة", style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-
-                    // القائمة السفلية
-                    SizedBox(
-                      height: 150,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _forecast?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          final dayWeather = _forecast![index];
-
-                          Widget cardContent = Container(
-                            width: 100,
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(color: Colors.white.withOpacity(0.2)),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Lottie.asset(
-                                  _getWeatherAnimation(dayWeather.mainCondition),
-                                  height: 50,
-                                ),
-                                const SizedBox(height: 5),
-                                Text('${dayWeather.temperature.round()}°C',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold)),
-                                Text(
-                                  DateFormat('E', settings.language).format(DateTime.now().add(Duration(days: index + 1))), // استخدام settings.language
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          );
-                          return GestureDetector(
-                            onTap: () {
-                              // عند الضغط، نفتح النافذة بالتفاصيل
-                              // نمرر التاريخ التقريبي لليوم (index + 1)
-                              // ونمرر "true" إذا كان الوضع الزجاجي مفعلاً أو الوضع الليلي لتحسين ألوان النصوص
-                              bool isGlassMode = settings.enableGlassmorphism || settings.isDarkMode;
-                              // 1. حساب تاريخ هذا اليوم (اليوم الحالي + ترتيب العنصر + 1)
-                              DateTime date = DateTime.now().add(Duration(days: index + 1));
-
-                              // 2. تمرير التاريخ للدالة
-                              _showDailyDetails(context, dayWeather, isGlassMode, date);
-                              },
-                            child: settings.enableGlassmorphism
-                                ? ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: cardContent,
-                              ),
-                            )
-                                : cardContent,
-                          );
-                          if (settings.enableGlassmorphism) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: cardContent,
-                              ),
-                            );
-                          } else {
-                            return cardContent;
-                          }
-                        },
-                      ),
-                    ),
+                    )
                   ],
-                ),
+
+                  const SizedBox(height: 30),
+                  // --- قسم توقعات الساعات (الجديد) ---
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text("خلال 24 ساعة", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    height: 100, // ارتفاع أقل قليلاً من القائمة السفلية
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _hourlyForecast?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final hourWeather = _hourlyForecast![index];
+                        // استخراج الوقت فقط (الساعة)
+                        // الـ API يعيد الوقت بصيغة "2023-10-25 15:00:00"
+                        // نحن نريد عرض الساعة فقط "03:00 PM"
+                        // سنستخدم DateFormat مخصص لذلك، لكن للسهولة سنستخدم DateTime parsing
+                        // (ملاحظة: هذا يتطلب أن يكون weather_model يحتوي على خاصية dt_txt أو نحسبها يدوياً)
+                        // *تحديث سريع*: WeatherModel الحالي لا يحفظ الوقت كنص.
+                        // *الحل*: سنضيف الوقت الحالي + (index * 3) ساعات لتقريب الوقت، أو نعدل المودل.
+                        // الأسهل والأنظف الآن هو استخدام وقت تقريبي للعرض:
+                        final time = DateTime.now().add(Duration(hours: (index + 1) * 3));
+
+                        Widget cardContent = Container(
+                          width: 80,
+                          margin: const EdgeInsets.symmetric(horizontal: 5),
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                DateFormat('hh:mm a', settings.language).format(time), // الساعة
+                                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                              ),
+                              Lottie.asset(
+                                _getWeatherAnimation(hourWeather.mainCondition),
+                                height: 30,
+                              ),
+                              Text(
+                                '${hourWeather.temperature.round()}°',
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        // تطبيق الزجاج إذا مفعل
+                        return settings.enableGlassmorphism
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                              child: cardContent),
+                        )
+                            : cardContent;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // ------------------------------------
+                  const Text("توقعات الأيام القادمة", style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+
+                  // القائمة السفلية
+                  SizedBox(
+                    height: 150,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _forecast?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        final dayWeather = _forecast![index];
+
+                        Widget cardContent = Container(
+                          width: 100,
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: Colors.white.withOpacity(0.2)),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Lottie.asset(
+                                _getWeatherAnimation(dayWeather.mainCondition),
+                                height: 50,
+                              ),
+                              const SizedBox(height: 5),
+                              Text('${dayWeather.temperature.round()}°C',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold)),
+                              Text(
+                                DateFormat('E', settings.language).format(DateTime.now().add(Duration(days: index + 1))), // استخدام settings.language
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        );
+                        return GestureDetector(
+                          onTap: () {
+                            // عند الضغط، نفتح النافذة بالتفاصيل
+                            // نمرر التاريخ التقريبي لليوم (index + 1)
+                            // ونمرر "true" إذا كان الوضع الزجاجي مفعلاً أو الوضع الليلي لتحسين ألوان النصوص
+                            bool isGlassMode = settings.enableGlassmorphism || settings.isDarkMode;
+                            // 1. حساب تاريخ هذا اليوم (اليوم الحالي + ترتيب العنصر + 1)
+                            DateTime date = DateTime.now().add(Duration(days: index + 1));
+
+                            // 2. تمرير التاريخ للدالة
+                            _showDailyDetails(context, dayWeather, isGlassMode, date);
+                          },
+                          child: settings.enableGlassmorphism
+                              ? ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: cardContent,
+                            ),
+                          )
+                              : cardContent,
+                        );
+                        if (settings.enableGlassmorphism) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: cardContent,
+                            ),
+                          );
+                        } else {
+                          return cardContent;
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
+      ),
     );
   }
 }

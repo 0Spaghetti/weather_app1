@@ -46,6 +46,17 @@ class SettingsPage extends StatelessWidget {
                 ),
                 _buildDivider(isDark),
                 _buildCustomTile(
+                  title: isArabic ? "واجهة البطاقات" : "Card Layout",
+                  subtitle: isArabic ? "تقسيم الشاشة إلى صناديق" : "Group items in boxes",
+                  icon: Icons.dashboard_customize, // أيقونة معبرة
+                  iconColor: Colors.indigo,
+                  isSwitch: true,
+                  value: settings.useCardLayout,
+                  onChanged: (val) => settings.toggleCardLayout(val),
+                  isDark: isDark,
+                ),
+                _buildDivider(isDark),
+                _buildCustomTile(
                   title: isArabic ? "تأثير الزجاج" : "Glassmorphism",
                   icon: Icons.blur_on,
                   iconColor: Colors.blue,
