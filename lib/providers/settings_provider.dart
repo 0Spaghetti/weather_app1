@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class SettingsProvider with ChangeNotifier {
-  // القيم الافتراضية
+
   bool _isDarkMode = false;
   bool _isCelsius = true;
   bool _enableGlassmorphism = true;
@@ -12,7 +12,6 @@ class SettingsProvider with ChangeNotifier {
   String _language = 'ar'; // 'ar' or 'en'
   bool _isDynamicBackground = false;
 
-  // استدعاء القيم لقراءتها
   bool get isDarkMode => _isDarkMode;
   bool get isCelsius => _isCelsius;
   bool get enableGlassmorphism => _enableGlassmorphism;
@@ -41,7 +40,7 @@ class SettingsProvider with ChangeNotifier {
     _isDarkMode = value;
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool('isDarkMode', value);
-    notifyListeners(); // تحديث التطبيق فوراً
+    notifyListeners();
   }
 
   void toggleUnit(bool value) async {

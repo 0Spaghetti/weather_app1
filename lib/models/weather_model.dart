@@ -6,7 +6,6 @@ class WeatherModel {
   final String iconCode;
   final int humidity;
   final double windSpeed;
-  // --- جديد: الشروق والغروب ---
   final int sunrise;
   final int sunset;
 

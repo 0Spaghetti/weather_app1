@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart'; // 1. استيراد مكتبة لوتي
+import 'package:lottie/lottie.dart';
 import 'weather_page.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -30,7 +30,6 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
-          // خلفية متدرجة
           gradient: LinearGradient(
             colors: [Colors.blue, Colors.purple],
             begin: Alignment.topRight,
@@ -40,31 +39,17 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 2. استبدال الأيقونة الثابتة بأنيميشن متحرك
             Lottie.asset(
-              'lib/assets/splashscreenanimation.json', // مسار ملف الأنيميشن
-              height: 400, // التحكم بالحجم
+              'lib/assets/splashscreenanimation.json',
+              height: 400,
             ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              "Weather App",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 50),
 
             Lottie.asset(
               'lib/assets/wave_loading.json',
               height: 100,
             ),
 
-            const SizedBox(height: 50),
+            const SizedBox(height: 20),
 
             const Text(
               "Developed by:",
@@ -72,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 10),
             const Text(
-              "مهند & محمد", // ⚠️ لا تنس كتابة اسمك
+              "مهند & محمد",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 26,

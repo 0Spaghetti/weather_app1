@@ -194,15 +194,11 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
-  // -------------------------------------------
-
-  // ... (باقي الدوال المساعدة _buildSectionHeader وغيرها تبقى كما هي في كودك السابق)
 
   Widget _buildSectionHeader(String title, bool isDark) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 8, 8),
       child: Align(
-        // محاذاة النص حسب اللغة
         alignment: Alignment.centerRight,
         child: Text(
           title,
