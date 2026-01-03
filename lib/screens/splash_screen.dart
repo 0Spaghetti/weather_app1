@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'weather_page.dart';
+import 'package:weather_app/screens/home/weather_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

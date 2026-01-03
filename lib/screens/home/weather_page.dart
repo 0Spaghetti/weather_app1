@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../models/weather_model.dart';
-import '../services/weather_service.dart';
+import '../../models/weather_model.dart';
+import '../../services/weather_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
-import 'settings_page.dart';
+import '../../providers/settings_provider.dart';
+import '../settings/settings_page.dart';
 import 'dart:ui'; // مهمة جداً للتأثير الزجاجي (BackdropFilter)
-import 'map_picker_page.dart';
+import '../map_picker_page.dart';
+import '../../utils/weather_utils.dart';
 
 
 class WeatherPage extends StatefulWidget {
@@ -290,82 +291,6 @@ class _WeatherPageState extends State<WeatherPage> {
     );
   }
 
-  // دالة الألوان
-  LinearGradient _getBackgroundGradient(String? mainCondition) {
-    if (mainCondition == null)
-      return const LinearGradient(colors: [Colors.blue, Colors.lightBlue]);
-    switch (mainCondition.toLowerCase()) {
-      case 'clouds':
-        return LinearGradient(
-            colors: [Colors.grey.shade800, Colors.grey.shade500],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter);
-      case 'rain':
-        return LinearGradient(
-            colors: [Colors.grey.shade900, Colors.blueGrey.shade700],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter);
-      case 'clear':
-        return LinearGradient(
-            colors: [Colors.orange.shade400, Colors.blue.shade600],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter);
-      default:
-        return const LinearGradient(colors: [Colors.blue, Colors.lightBlue],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter);
-    }
-  }
-
-// دالة لتحديد ملف الأنيميشن المناسب
-  String _getWeatherAnimation(String? mainCondition) {
-    if (mainCondition == null) return 'lib/assets/sunny.json'; // القيمة الافتراضية
-
-    switch (mainCondition.toLowerCase()) {
-      case 'clouds':
-      case 'mist':
-      case 'smoke':
-      case 'haze':
-      case 'dust':
-      case 'fog':
-        return 'lib/assets/cloudy.json';
-      case 'rain':
-      case 'drizzle':
-      case 'shower rain':
-        return 'lib/assets/rainy.json';
-      case 'thunderstorm':
-        return 'lib/assets/thunder.json';
-      case 'clear':
-        return 'lib/assets/sunny.json';
-      default:
-        return 'lib/assets/sunny.json';
-    }
-  }
-
-  String? _getDynamicBackgroundAnimation() {
-    if (_weather == null) return null;
-
-    final condition = _weather!.mainCondition.toLowerCase();
-    final now = DateTime.now();
-
-    final sunriseTime = DateTime.fromMillisecondsSinceEpoch(_weather!.sunrise * 1000);
-    final sunsetTime = DateTime.fromMillisecondsSinceEpoch(_weather!.sunset * 1000);
-
-    bool isNight = now.isAfter(sunsetTime) || now.isBefore(sunriseTime);
-
-    if (condition.contains('clear')) {
-      return isNight ? 'lib/assets/clear_night.json' : 'lib/assets/clear_day.json';
-    }
-    else if (condition.contains('rain') || condition.contains('drizzle') || condition.contains('thunder')) {
-      return isNight ? 'lib/assets/rainy_night.json' : 'lib/assets/thunder_day.json';
-    }
-    else if (condition.contains('cloud')) {
-      return isNight ? 'lib/assets/cloudy_night.json' : 'lib/assets/cloud.json';
-    }
-
-    return 'lib/assets/clear_day.json';
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -432,7 +357,7 @@ class _WeatherPageState extends State<WeatherPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              gradient: _getBackgroundGradient(_weather?.mainCondition),
+              gradient: WeatherUtils.getBackgroundGradient(_weather?.mainCondition),
             ),
           ),
 
@@ -440,7 +365,7 @@ class _WeatherPageState extends State<WeatherPage> {
              Positioned.fill(
                child: Builder(
                  builder: (context) {
-                   String? animFile = _getDynamicBackgroundAnimation();
+                   String? animFile = WeatherUtils.getDynamicBackgroundAnimation(_weather);
 
                    if (animFile == null) return const SizedBox();
 
@@ -521,7 +446,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                   ),
                                   const SizedBox(height: 20),
                                   Lottie.asset(
-                                    _getWeatherAnimation(_weather?.mainCondition),
+                                    WeatherUtils.getWeatherAnimation(_weather?.mainCondition),
                                     height: 150,
                                   ),
                                   Text(
@@ -593,7 +518,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                      Text(DateFormat('ha').format(DateTime.now().add(Duration(hours: index * 3))), style: const TextStyle(color: Colors.white, fontSize: 12)),
-                                    Lottie.asset(_getWeatherAnimation(hour.mainCondition), height: 40),
+                                    Lottie.asset(WeatherUtils.getWeatherAnimation(hour.mainCondition), height: 40),
                                     Text('${hour.temperature.round()}°', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
@@ -663,7 +588,7 @@ class _WeatherPageState extends State<WeatherPage> {
                                             width: 40,
                                             height: 40,
                                             child: Lottie.asset(
-                                                _getWeatherAnimation(day.mainCondition),
+                                                WeatherUtils.getWeatherAnimation(day.mainCondition),
                                                 fit: BoxFit.contain // احتواء الصورة داخل المربع
                                             ),
                                           ),

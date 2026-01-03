@@ -13,6 +13,7 @@ class MapPickerPage extends StatefulWidget {
 class _MapPickerPageState extends State<MapPickerPage> {
   LatLng _selectedLocation = const LatLng(32.8872, 13.1913); // Default city
   String? _resolvedCity;
+  String? _resolutionError;
   bool _resolving = false;
 
   final MapController _mapController = MapController();
@@ -29,6 +30,7 @@ class _MapPickerPageState extends State<MapPickerPage> {
     setState(() {
       _resolving = true;
       _resolvedCity = null;
+      _resolutionError = null;
     });
 
     try {
@@ -49,10 +51,19 @@ class _MapPickerPageState extends State<MapPickerPage> {
           setState(() {
             _resolvedCity = '$city,$countryCode';
           });
+        } else {
+          // If no city is found, provide feedback
+          setState(() {
+            _resolutionError = "No city found at this location.";
+          });
         }
       }
-    } catch (_) {
+    } catch (e) {
       // ignore
+      debugPrint("Geocoding Error: \$e");
+      setState(() {
+        _resolutionError = "Could not connect to the service.";
+      });
     } finally {
       setState(() => _resolving = false);
     }
@@ -157,10 +168,12 @@ class _MapPickerPageState extends State<MapPickerPage> {
                     Text(
                       _resolving
                           ? 'Finding nearest city...'
-                          : (_resolvedCity ?? 'Tap on a city'),
-                      style: const TextStyle(
+                          : (_resolutionError ?? _resolvedCity ?? 'Tap on a city'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: _resolutionError != null ? Colors.redAccent : null,
                       ),
                     ),
                     const SizedBox(height: 12),

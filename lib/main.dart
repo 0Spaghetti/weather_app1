@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'screens/weather_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/splash_screen.dart';
 import 'package:provider/provider.dart';
