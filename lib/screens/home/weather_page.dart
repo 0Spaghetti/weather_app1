@@ -7,7 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import '../../providers/settings_provider.dart';
 import '../settings/settings_page.dart';
-import 'dart:ui'; // مهمة جداً للتأثير الزجاجي (BackdropFilter)
+import 'dart:ui';
 import '../map_picker_page.dart';
 import '../../utils/weather_utils.dart';
 import '../../widgets/current_weather_card.dart';
@@ -28,12 +28,14 @@ class _WeatherPageState extends State<WeatherPage> {
   bool _isLoading = true;
   final TextEditingController _cityController = TextEditingController(); // للتحكم في نص البحث
 
+  // دالة تُستدعى مرة واحدة عند بدء تشغيل الصفحة، وتقوم بتحميل بيانات الطقس الأولية
   @override
   void initState() {
     super.initState();
     _loadLastCityAndFetch(); // نبدأ بتحميل آخر مدينة محفوظة أو الـ GPS
   }
 
+  // دالة لجلب بيانات الطقس باستخدام الإحداثيات (خطوط الطول والعرض) وتحديث الواجهة
   Future<void> _fetchWeatherByCoordinates(double lat, double lon) async {
     setState(() => _isLoading = true);
     final lang = Provider.of<SettingsProvider>(context, listen: false).language;
@@ -54,6 +56,7 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
+  // دالة لتحميل بيانات الطقس للمدينة الأخيرة التي تم البحث عنها أو موقع الـ GPS الحالي
   Future<void> _loadLastCityAndFetch() async {
     final prefs = await SharedPreferences.getInstance();
     final source = prefs.getString('last_source');
@@ -78,6 +81,7 @@ class _WeatherPageState extends State<WeatherPage> {
     await _fetchWeather(currentCity);
   }
 
+  // دالة لجلب بيانات الطقس بناءً على اسم المدينة وتحديث الواجهة
   Future<void> _fetchWeather(String cityName) async {
     setState(() => _isLoading = true);
     final lang = Provider.of<SettingsProvider>(context, listen: false).language;
@@ -105,6 +109,7 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
+  // دالة لعرض نافذة منبثقة تحتوي على تفاصيل الطقس ليوم محدد من التوقعات
   void _showDailyDetails(BuildContext context, WeatherModel day, bool isGlass, DateTime date) {
     final lang = Provider.of<SettingsProvider>(context, listen: false).language;
 
@@ -156,6 +161,7 @@ class _WeatherPageState extends State<WeatherPage> {
     );
   }
 
+  // دالة لعرض نافذة منبثقة تحتوي على التفاصيل الحالية للطقس (الرطوبة، الرياح، إلخ)
   void _showCurrentDetails(BuildContext context, bool isGlass) {
     if (_weather == null) return;
 
@@ -214,6 +220,7 @@ class _WeatherPageState extends State<WeatherPage> {
     );
   }
 
+  // ويدجت مساعد لبناء عنصر واحد من تفاصيل الطقس (مثل أيقونة وقيمة واسم)
   Widget _buildDetailItem(IconData icon, String value, String label, bool isDarkInfo) {
     Color color = isDarkInfo ? Colors.white : Colors.black;
     return Column(
@@ -226,6 +233,7 @@ class _WeatherPageState extends State<WeatherPage> {
     );
   }
 
+  // دالة لعرض مربع حوار يسمح للمستخدم بالبحث عن مدينة جديدة
   void _showCitySearchDialog() {
     showDialog(
       context: context,
@@ -252,6 +260,7 @@ class _WeatherPageState extends State<WeatherPage> {
     );
   }
 
+  // الدالة الرئيسية التي تبني واجهة المستخدم الكاملة للصفحة
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<SettingsProvider>(context);
