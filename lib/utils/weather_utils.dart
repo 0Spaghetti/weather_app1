@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:weather_app/models/weather_model.dart';
 
 class WeatherUtils {
+  // دالة لتحديد التدرج اللوني للخلفية بناءً على حالة الطقس الرئيسية
   static LinearGradient getBackgroundGradient(String? mainCondition) {
     if (mainCondition == null) {
       return const LinearGradient(colors: [Colors.blue, Colors.lightBlue]);
@@ -37,6 +38,7 @@ class WeatherUtils {
     }
   }
 
+  // دالة لتحديد أيقونة الطقس (ملف الأنيميشن) بناءً على حالة الطقس
   static String getWeatherAnimation(String? mainCondition) {
     if (mainCondition == null) return 'lib/assets/sunny.json';
 
@@ -61,6 +63,7 @@ class WeatherUtils {
     }
   }
 
+  // دالة لتحديد الخلفية المتحركة بناءً على حالة الطقس والوقت (ليل أو نهار)
   static String? getDynamicBackgroundAnimation(WeatherModel? weather) {
     if (weather == null) return null;
 
@@ -73,17 +76,19 @@ class WeatherUtils {
 
     if (condition.contains('clear')) {
       return isNight ? 'lib/assets/clear_night.json' : 'lib/assets/clear_day.json';
-    } else if (condition.contains('rain') ||
-        condition.contains('drizzle') ||
-        condition.contains('thunder')) {
+    } else if (condition.contains('rain')) {
+      return isNight ? 'lib/assets/rainy_night.json' : 'lib/assets/clear_day.json';
+    }
+    else if (condition.contains('drizzle') || condition.contains('thunder')) {
       return isNight
           ? 'lib/assets/rainy_night.json'
           : 'lib/assets/thunder_day.json';
     } else if (condition.contains('cloud')) {
-      return isNight ? 'lib/assets/cloudy_night.json' : 'lib/assets/cloudy.json';
+      return isNight ? 'lib/assets/clear_night.json' : 'lib/assets/clear_night.json';
     }
 
-    // Default animation if no specific condition is met
     return isNight ? 'lib/assets/clear_night.json' : 'lib/assets/clear_day.json';
   }
 }
+
+//rainy_night.json (condition.contains('rain')

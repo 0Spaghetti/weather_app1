@@ -17,6 +17,7 @@ class CurrentWeatherCard extends StatelessWidget {
     required this.onTap,
   });
 
+  // دالة بناء الواجهة، مسؤولة عن عرض بطاقة الطقس الحالية الرئيسية
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<SettingsProvider>(context);

@@ -13,6 +13,7 @@ class GlassContainer extends StatelessWidget {
     this.isGlassEnabled = true,
   });
 
+  // دالة بناء الواجهة، مسؤولة عن عرض حاوية زجاجية قابلة لإعادة الاستخدام
   @override
   Widget build(BuildContext context) {
     Widget content = Container(

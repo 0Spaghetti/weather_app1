@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:weather_app/models/weather_model.dart';
 import 'package:weather_app/providers/settings_provider.dart';
 import 'package:weather_app/utils/weather_utils.dart';
+import 'package:weather_app/widgets/glass_container.dart';
 
 class HourlyForecastList extends StatelessWidget {
   final List<WeatherModel> hourlyForecast;
@@ -16,9 +17,10 @@ class HourlyForecastList extends StatelessWidget {
     required this.onHourTap,
   });
 
+  // دالة بناء الواجهة، مسؤولة عن عرض قائمة توقعات الطقس الساعية
   @override
   Widget build(BuildContext context) {
-    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    final settings = Provider.of<SettingsProvider>(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -26,7 +28,7 @@ class HourlyForecastList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            settings.language == 'ar' ? "توقعات الساعات القادمة" : "HOURLY FORECAST",
+            settings.language == 'ar' ? "خلال الساعات ال12 القادمة" : "HOURLY FORECAST",
             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
@@ -38,36 +40,38 @@ class HourlyForecastList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final hour = hourlyForecast[index];
                 final date = DateTime.now().add(Duration(hours: (index + 1) * 3));
-                return GestureDetector(
-                  onTap: () => onHourTap(hour, date),
-                  child: Container(
-                    width: 80,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(38),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withAlpha(51)),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          DateFormat('ha', settings.language).format(date),
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: GestureDetector(
+                    onTap: () => onHourTap(hour, date),
+                    child: GlassContainer(
+                      isGlassEnabled: settings.enableGlassmorphism,
+                      child: SizedBox(
+                        width: 80,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              DateFormat('ha', settings.language).format(date),
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                            Lottie.asset(
+                              WeatherUtils.getWeatherAnimation(hour.mainCondition),
+                              height: 40,
+                            ),
+                            Text(
+                              settings.isCelsius
+                                  ? '${hour.temperature.round()}°C'
+                                  : '${(hour.temperature * 9 / 5 + 32).round()}°F',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        Lottie.asset(
-                          WeatherUtils.getWeatherAnimation(hour.mainCondition),
-                          height: 40,
-                        ),
-                        Text(
-                          '${hour.temperature.round()}°',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 );
