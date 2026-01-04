@@ -62,14 +62,17 @@ class CurrentWeatherCard extends StatelessWidget {
               WeatherUtils.getWeatherAnimation(weather.mainCondition),
               height: 150,
             ),
-            Text(
-              settings.isCelsius
-                  ? '${weather.temperature.round()}°C'
-                  : '${(weather.temperature * 9 / 5 + 32).round()}°F',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 65,
-                fontWeight: FontWeight.bold,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                settings.isCelsius
+                    ? '${weather.temperature.round()}°C'
+                    : '${(weather.temperature * 9 / 5 + 32).round()}°F',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 65,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Text(

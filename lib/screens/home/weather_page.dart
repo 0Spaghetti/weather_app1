@@ -64,18 +64,22 @@ class _WeatherPageState extends State<WeatherPage> {
 
     try {
       final weather = await _weatherService.getWeatherByCoordinates(lat, lon, lang: lang);
-      final forecast = await _weatherService.getForecastByCoordinates(lat, lon, lang: lang);
-      final hourly = await _weatherService.getHourlyByCoordinates(lat, lon, lang: lang);
+
+      final forecastResult = await _weatherService.getComprehensiveForecastByCoordinates(lat, lon, lang: lang);
 
       setState(() {
         _weather = weather;
-        _forecast = forecast;
-        _hourlyForecast = hourly;
+        _forecast = forecastResult.daily;   // قائمة الأيام
+        _hourlyForecast = forecastResult.hourly; // قائمة الساعات
         _isLoading = false;
       });
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('last_city', weather.cityName);
+
     } catch (e) {
       setState(() => _isLoading = false);
-      print(e);
+      print("Error fetching weather by coords: $e");
     }
   }
 
@@ -85,23 +89,21 @@ class _WeatherPageState extends State<WeatherPage> {
 
     try {
       final weather = await _weatherService.getWeather(cityName, lang: lang);
-      final forecast = await _weatherService.getForecast(cityName, lang: lang);
-      final hourly = await _weatherService.getHourlyForecast(cityName, lang: lang);
+
+      final forecastResult = await _weatherService.getComprehensiveForecast(cityName, lang: lang);
 
       setState(() {
         _weather = weather;
-        _forecast = forecast;
-        _hourlyForecast = hourly;
+        _forecast = forecastResult.daily;
+        _hourlyForecast = forecastResult.hourly;
         _isLoading = false;
       });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('last_city', cityName);
-      prefs.remove('last_source');
-
     } catch (e) {
       setState(() => _isLoading = false);
-      print(e);
+      print("Error fetching weather: $e");
     }
   }
 
